@@ -45,9 +45,7 @@ class Game(object):
         players = []
         index = 0
         while True:
-            print(self.board.actions, self.board.availables)
             action, prob = alphago_zero.get_action(self.board)
-            print(action, self.board.actions, self.board.availables)
             index += 1
             # store the data
             X.append(self.board.state)
@@ -60,8 +58,9 @@ class Game(object):
             is_end, player = self.board.is_end
             if is_end:
                 index += 1
-                if index % 100 == 0:
+                if index % 50 == 0:
                     self.records.append(self.board.actions)
+                    self.save_record()
                 z = np.zeros(len(players))
                 if player != -1:
                     # set reword for each position state

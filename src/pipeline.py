@@ -41,10 +41,10 @@ class PipelineTrain(object):
                     if loss < best_loss:
                         self.model.save_weights(i + 1)
                         best_loss = loss
-                        self.evaluate()
+                        # self.evaluate()
         # save self play record
-        print('save record to visualize')
-        self.save_record()
+        # print('save record to visualize')
+        # self.save_record()
 
     def save_record(self):
         self.game.save_record()
