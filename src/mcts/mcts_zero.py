@@ -15,7 +15,6 @@ class MCTSZero(object):
             actions, probs = self.mcts.get_actions(board)
             # choose 最大概率的action
             action = actions[np.argmax(probs)]
-            self.mcts.do_action(action)
             return action, np.zeros(width * height)
 
     def set_player(self, player):

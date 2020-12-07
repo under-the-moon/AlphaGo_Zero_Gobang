@@ -56,19 +56,15 @@ while True:
             h = round((y - 40) / 70)
             w = round((x - 40) / 70)
             action = h * width + w
-            mcts.reset_action(board, action)
+            mcts.add_action(board)
             board.move(action)
             draw(board.actions)
             is_end, player = board.is_end
             if is_end:
-                board.reset()
-                screen.fill([125, 95, 24])
+                sys.exit()
             action, probs = mcts_zero.get_action(board)
             board.move(action)
             draw(board.actions)
             is_end, player = board.is_end
             if is_end:
-                board.reset()
-                screen.fill([125, 95, 24])
-
-        break
+                sys.exit()

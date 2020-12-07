@@ -20,7 +20,8 @@ class MCTS(object):
         for i in range(self.simulation_num):
             board_tmp = deepcopy(board)
             self._search(board_tmp)
-        action_visites = [(action, node.n) for action, node in self.root.childrens.items()]
+        new_node = self._loc_node(board)
+        action_visites = [(action, node.n) for action, node in new_node.childrens.items()]
         actions, visites = zip(*action_visites)
         if hasattr(self.model, 'pure_mcts'):
             # 概率就等于访问数量 不需要计算softmax 选择访问次数最大的
@@ -29,13 +30,21 @@ class MCTS(object):
             probs = softmax(1.0 / t * np.log(np.array(visites)) + 1e-10)
         return np.array(actions), probs
 
+    def _loc_node(self, board):
+        actions = board.actions
+        node = self.root
+        if len(actions) > 0:
+            for action, _ in actions.items():
+                node = node.childrens[action]
+        return node
+
     def _search(self, board):
         """
         more detail see mcts/mcts.png
         :param board:
         :return:
         """
-        node = self.root
+        node = self._loc_node(board)
         while True:
             if node.is_leaf:
                 break
@@ -83,21 +92,16 @@ class MCTS(object):
                 value = 1 if player == current_player else -1
         return value
 
-    def do_action(self, action):
-        if action in self.root.childrens.keys():
-            self.root = self.root.childrens[action]
-            self.root.parent = None
-
-    def reset_action(self, board, action):
+    def add_action(self, board):
+        """
+        给 mct添加新的节点 与人对弈是需要用到 改编蒙特卡罗树的状态
+        :param board:
+        :return:
+        """
+        actions = board.actions
+        availables = board.availables
         node = self.root
-        if len(node.childrens) == 0:
-            probs, values = self.model.policy_value(board)
-            probs, values = np.squeeze(probs), np.squeeze(values)
-            actions = list(board.availables)
-            action_probs = probs[list(actions)]
-            node.expansion(list(zip(actions, action_probs)))
-            self.do_action(action)
-
-    def reset(self):
-        # rest mct
-        self.root = Node(None, 1.)
+        if len(actions) > 0:
+            for action, _ in actions.items():
+                node = node.childrens[action]
+        node.expansion(list(zip(availables, np.zeros(len(board.availables)))))

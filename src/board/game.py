@@ -45,7 +45,9 @@ class Game(object):
         players = []
         index = 0
         while True:
+            print(self.board.actions, self.board.availables)
             action, prob = alphago_zero.get_action(self.board)
+            print(action, self.board.actions, self.board.availables)
             index += 1
             # store the data
             X.append(self.board.state)
@@ -65,7 +67,6 @@ class Game(object):
                     # set reword for each position state
                     z[np.array(players) == player] = 1.0
                     z[np.array(players) != player] = -1.0
-                alphago_zero.reset()
                 if self.show:
                     if player != -1:
                         print("Game over. Winner is :", config.players[player])
