@@ -10,7 +10,7 @@ class Game(object):
         self.width = self.board.width
         self.height = self.board.height
         self.index = 0
-        # 没100次对局记录一次
+        # 每50次对局记录一次
         self.records = []
 
     def draw(self, player1, player2):
@@ -43,10 +43,8 @@ class Game(object):
         X = []
         PI = []
         players = []
-        index = 0
         while True:
-            action, prob = alphago_zero.get_action(self.board)
-            index += 1
+            action, prob = alphago_zero.get_action(self.board, t=1)
             # store the data
             X.append(self.board.state)
             PI.append(prob)
@@ -57,8 +55,8 @@ class Game(object):
             self.draw(self.board.players[0], self.board.players[1])
             is_end, player = self.board.is_end
             if is_end:
-                index += 1
-                if index % 50 == 0:
+                self.index += 1
+                if self.index % 50 == 0:
                     self.records.append(self.board.actions)
                     self.save_record()
                 z = np.zeros(len(players))

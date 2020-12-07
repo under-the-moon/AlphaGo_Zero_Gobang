@@ -23,5 +23,5 @@ t = 1
 per_search_simulation_num = 1600
 
 # save weigths path
-save_path = '../model/'
-record_path = '../model/record.pkl'
+save_path = 'model/'
+record_path = 'model/record.pkl'
