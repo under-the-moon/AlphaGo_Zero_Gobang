@@ -7,7 +7,7 @@ sys.setrecursionlimit(1000000)
 
 class Node(object):
 
-    def __init__(self, parent, p):
+    def __init__(self, parent, p, action=-1):
         # parent for Backpropagation
         self.parent = parent
         #  Each edge (s, a) in the search tree stores a prior probability P(s, a), a visit count N(s, a),
@@ -35,11 +35,15 @@ class Node(object):
         # save available actions mapping TreeNode
         self.childrens = {}
         self.c_put = config.c_put
+        self.action = action
 
     def expansion(self, action_probs):
         for action, prob in action_probs:
             if action not in self.childrens.keys():
-                self.childrens[action] = Node(self, prob)
+                self.childrens[action] = Node(self, prob, action)
+            else:
+                self.childrens[action].p = prob
+                self.childrens[action].action = action
 
     def update(self, value):
         if self.parent:
@@ -83,4 +87,4 @@ class Node(object):
 
     @property
     def is_root(self):
-        return self.parnt is None
+        return self.parent is None

@@ -1,6 +1,7 @@
 import numpy as np
 import pickle
 from src import config
+import time
 
 
 class Game(object):
@@ -44,6 +45,8 @@ class Game(object):
         PI = []
         players = []
         while True:
+            print('per action start')
+            start = time.time()
             action, prob = alphago_zero.get_action(self.board, t=1)
             # store the data
             X.append(self.board.state)
@@ -54,9 +57,10 @@ class Game(object):
             # draw board
             self.draw(self.board.players[0], self.board.players[1])
             is_end, player = self.board.is_end
+            print('per action end cost: {}'.format(time.time() - start))
             if is_end:
                 self.index += 1
-                if self.index % 50 == 0:
+                if self.index % 100 == 0:
                     self.records.append(self.board.actions)
                     self.save_record()
                 z = np.zeros(len(players))
@@ -66,7 +70,7 @@ class Game(object):
                     z[np.array(players) != player] = -1.0
                 if self.show:
                     if player != -1:
-                        print("Game over. Winner is :", config.players[player])
+                        print("Game over. Winner is :", player)
                     else:
                         print("Game over. Tie")
                 return np.array(X), np.array(PI), np.array(z)

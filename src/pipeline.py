@@ -6,6 +6,7 @@ from src.mcts.mcts import MCTS
 from src.mcts.alphago_zero import AlphaGoZero
 from src.mcts.mcts_zero import MCTSZero
 from src.models.mcts import Model
+import time
 
 
 class PipelineTrain(object):
@@ -22,26 +23,32 @@ class PipelineTrain(object):
     def train(self):
         print('train alphago zero')
         best_loss = np.inf
+        print('self play 100 games collect data start')
+        start = time.time()
+        self.add_selfplay_data(100)
+        end = time.time()
+        print('self play 100 games collect data end cost: {}'.format(end - start))
         for i in range(self.epoch):
+            print('start to sample train data')
+            batch_data = random.sample(self.buffer_data,
+                                       self.size if self.size < self.batch_size * 100 else self.batch_size * 100)
+            X = [data[0] for data in batch_data]
+            PI = [data[1] for data in batch_data]
+            z = [data[2] for data in batch_data]
+            X = np.array(X)
+            y = [np.array(PI), np.array(z)]
+            start = time.time()
+            loss = self.model.train(X, y)
+            print('epoch: {} loss: {} cost: {}'.format(i + 1, loss, time.time() - start))
+            if (i + 1) % 100 == 0:
+                print('save weights...')
+                print('loss < best_loss', loss < best_loss)
+                if loss < best_loss:
+                    self.model.save_weights(i + 1)
+                    best_loss = loss
+                    # self.evaluate()
+            # self play
             self.add_selfplay_data()
-            if self.size > self.batch_size * 10:
-                print('start to sample train data')
-                batch_data = random.sample(self.buffer_data,
-                                           self.size if self.size < self.batch_size * 100 else self.batch_size * 100)
-                X = [data[0] for data in batch_data]
-                PI = [data[1] for data in batch_data]
-                z = [data[2] for data in batch_data]
-                X = np.array(X)
-                y = [np.array(PI), np.array(z)]
-                loss = self.model.train(X, y)
-                print('epoch: {} loss: {}'.format(i + 1, loss))
-                if (i + 1) % 100 == 0:
-                    print('save weights...')
-                    print('loss < best_loss', loss < best_loss)
-                    if loss < best_loss:
-                        self.model.save_weights(i + 1)
-                        best_loss = loss
-                        # self.evaluate()
         # save self play record
         # print('save record to visualize')
         # self.save_record()
@@ -63,11 +70,16 @@ class PipelineTrain(object):
         print("game num:{}, win: {}, lose: {}, tie:{} win_rate: {}".
               format(game, win_cnt[0], win_cnt[1], win_cnt[-1], win_ratio))
 
-    def add_selfplay_data(self):
-        X, PI, z = self.game.self_play(self.alphago_zero)
-        X_all, PI_all, z_all = self.augement_data(X, PI, z)
-        assert len(X_all) == len(PI_all) and len(X_all) == len(z_all), 'data dims mismatch'
-        self.extend(X_all, PI_all, z_all)
+    def add_selfplay_data(self, games=1):
+        for i in range(games):
+            print('self play start')
+            start = time.time()
+            X, PI, z = self.game.self_play(self.alphago_zero)
+            end = time.time()
+            print('self play cost: {}'.format(end - start))
+            X_all, PI_all, z_all = self.augement_data(X, PI, z)
+            assert len(X_all) == len(PI_all) and len(X_all) == len(z_all), 'data dims mismatch'
+            self.extend(X_all, PI_all, z_all)
 
     def augement_data(self, X, PI, z):
         X_all = []

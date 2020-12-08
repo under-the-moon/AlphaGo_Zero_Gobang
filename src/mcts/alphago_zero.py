@@ -13,7 +13,7 @@ class AlphaGoZero(object):
         availables = board.availables
         width = board.width
         height = board.height
-        if len(availables):
+        if len(availables) > 0:
             all_probs = np.zeros(width * height)
             actions, probs = self.mcts.get_actions(board, t=t)
             all_probs[actions] = probs

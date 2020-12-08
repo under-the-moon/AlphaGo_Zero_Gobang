@@ -61,6 +61,6 @@ class GoBang(Board):
                     len(set(actions.get(i, -1) for i in range(m, m + n * (width - 1), width - 1))) == 1):
                 return True, player
         # Tie 平局
-        if not len(self.availables):
+        if len(self.availables) == 0:
             return True, -1
         return False, -1

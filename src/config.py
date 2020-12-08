@@ -1,5 +1,5 @@
-_border_widths = [8, 10, 12]
-_border_heights = [8, 10, 12]
+_border_widths = [6, 8, 10, 12]
+_border_heights = [6, 8, 10, 12]
 default_width = _border_widths[0]
 default_height = _border_heights[0]
 channel = 5
@@ -20,7 +20,7 @@ t = 1
 # Over the course of training, 4.9 million games of self-play were generated,
 # using 1,600 simulations for each MCTS, which corresponds to approximately 0.4s thinking time per move.
 # use 8 * 8  divide 5
-per_search_simulation_num = 1600
+per_search_simulation_num = 400
 
 # save weigths path
 save_path = 'model/'

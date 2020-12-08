@@ -39,5 +39,5 @@ class Board(object):
         """
         self.actions[action] = self.current_player
         # change the player
-        self.current_player = self.players[1] if self.current_player == self.players[0] else self.players[0]
+        self.current_player = self.players[0] if self.current_player == self.players[1] else self.players[1]
         self.availables.remove(action)

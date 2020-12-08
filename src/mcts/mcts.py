@@ -3,7 +3,7 @@ from src import config
 from src.mcts.node import Node
 from copy import deepcopy
 from src.utils.utils import softmax
-
+import time
 
 class MCTS(object):
     """
@@ -17,10 +17,11 @@ class MCTS(object):
         self.root = Node(None, 1.)
 
     def get_actions(self, board, t=1e-3):
+        new_node = self._loc_node(board)
         for i in range(self.simulation_num):
             board_tmp = deepcopy(board)
-            self._search(board_tmp)
-        new_node = self._loc_node(board)
+            self._search(board_tmp, new_node)
+
         action_visites = [(action, node.n) for action, node in new_node.childrens.items()]
         actions, visites = zip(*action_visites)
         if hasattr(self.model, 'pure_mcts'):
@@ -38,13 +39,15 @@ class MCTS(object):
                 node = node.childrens[action]
         return node
 
-    def _search(self, board):
+    def _search(self, board, node):
         """
         more detail see mcts/mcts.png
         :param board:
         :return:
         """
-        node = self._loc_node(board)
+        # index = len(board.actions)
+        # start = time.time()
+        # print('{} search start'.format(index))
         while True:
             if node.is_leaf:
                 break
@@ -52,26 +55,30 @@ class MCTS(object):
             action, node = node.select()
             # st -> st+1 change state
             board.move(action)
-
+        # end = time.time()
+        # print('{} search end cost: {}'.format(index, end - start))
         probs, values = self.model.policy_value(board)
-        probs, values = np.squeeze(probs), np.squeeze(values)
+        probs, values = np.squeeze(probs), np.squeeze(values, axis=0)
         actions = board.availables
         action_probs = probs[list(actions)]
         is_end, player = board.is_end
-        if hasattr(self.model, 'pure_mcts'):
-            if not is_end:
-                node.expansion(list(zip(actions, action_probs)))
-            value = self._rollout(board)
-        else:
-            if not is_end:
-                node.expansion(list(zip(actions, action_probs)))
-                # 用神经网络的value来更新权重
-                value = values
-            else:
-                if player == -1:
-                    value = 0.
-                else:
-                    value = 1 if player == board.current_player else -1
+        if not is_end:
+            node.expansion(list(zip(actions, action_probs)))
+        value = self._rollout(board)
+        # if hasattr(self.model, 'pure_mcts'):
+        #     if not is_end:
+        #         node.expansion(list(zip(actions, action_probs)))
+        #     value = self._rollout(board)
+        # else:
+        #     if not is_end:
+        #         node.expansion(list(zip(actions, action_probs)))
+        #         # 用神经网络的value来更新权重
+        #         value = values[0]
+        #     else:
+        #         if player == -1:
+        #             value = 0.
+        #         else:
+        #             value = 1 if player == board.current_player else -1
         # update value
         node.update(value)
 
