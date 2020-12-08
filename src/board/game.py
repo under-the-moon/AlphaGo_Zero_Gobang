@@ -59,6 +59,7 @@ class Game(object):
             is_end, player = self.board.is_end
             print('per action end cost: {}'.format(time.time() - start))
             if is_end:
+                alphago_zero.reset()
                 self.index += 1
                 if self.index % 100 == 0:
                     self.records.append(self.board.actions)

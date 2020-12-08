@@ -20,8 +20,9 @@ t = 1
 # Over the course of training, 4.9 million games of self-play were generated,
 # using 1,600 simulations for each MCTS, which corresponds to approximately 0.4s thinking time per move.
 # use 8 * 8  divide 5
-per_search_simulation_num = 400
+ratio = (19 * 19) // (default_width * default_height)
+per_search_simulation_num = 1600 // ratio
 
 # save weigths path
-save_path = 'model/'
-record_path = 'model/record.pkl'
+save_path = '../model/'
+record_path = '../model/record.pkl'

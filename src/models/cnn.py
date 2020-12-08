@@ -15,17 +15,15 @@ build an simple network
 
 class Model(object):
 
-    def __init__(self, weights_path=None):
+    def __init__(self):
         self.width = config.default_width
         self.height = config.default_height
         self.channel = config.channel
         self.c = config.l2_c
         self.batch_size = config.batch_size
-        self.weights_path = weights_path
         self.save_path = config.save_path
         self.classes_num = self.width * self.height
         self.model = self._init_model()
-        self.load_weigths()
 
     def _init_model(self):
         x = Input((self.height, self.width, self.channel))
@@ -63,15 +61,17 @@ class Model(object):
         # add batch dim
         if len(x.shape) == 3:
             x = np.expand_dims(x, axis=0)
-        return self.model.predict_on_batch(x)
+        probs, values = self.model.predict_on_batch(x)
+        availables = board.availables
+        return zip(availables, np.squeeze(probs)[list(availables)]), values[0][0]
 
     def save_weights(self, epoch=100):
         epoch = epoch // 100
         self.model.save_weights(os.path.join(self.save_path, 'alphago_zero_' + str(epoch) + '.h5'))
 
-    def load_weigths(self):
-        if self.weights_path and os.path.exists(self.weights_path):
-            self.model.load_weights(self.weights_path)
+    def load_weigths(self, weights_path):
+        if os.path.exists(weights_path):
+            self.model.load_weights(weights_path)
 
     def summary(self):
         self.model.summary()

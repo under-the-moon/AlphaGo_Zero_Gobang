@@ -41,9 +41,6 @@ class Node(object):
         for action, prob in action_probs:
             if action not in self.childrens.keys():
                 self.childrens[action] = Node(self, prob, action)
-            else:
-                self.childrens[action].p = prob
-                self.childrens[action].action = action
 
     def update(self, value):
         if self.parent:

@@ -4,9 +4,7 @@ import os
 import time
 import sys
 from src.board.gobang import GoBang
-from src.mcts.mcts_zero import MCTSZero
-from src.mcts.mcts import MCTS
-from src.models.mcts import Model
+from src.models.cnn import Model
 
 """
 使用棋盘开始玩
@@ -46,8 +44,7 @@ def draw(data=None):
 
 board = GoBang()
 model = Model()
-mcts = MCTS(model)
-mcts_zero = MCTSZero(mcts)
+model.load_weigths('model/best.h5')
 draw()
 while True:
     for event in pygame.event.get():
@@ -56,13 +53,15 @@ while True:
             h = round((y - 40) / 70)
             w = round((x - 40) / 70)
             action = h * width + w
-            mcts.add_action(board)
             board.move(action)
             draw(board.actions)
             is_end, player = board.is_end
             if is_end:
                 sys.exit()
-            action, probs = mcts_zero.get_action(board)
+            action_probs, value = model.policy_value(board)
+            print(action_probs, value)
+            action_probs = sorted(action_probs, key=lambda item: item[1], reverse=True)
+            action = action_probs[0][0]
             board.move(action)
             draw(board.actions)
             is_end, player = board.is_end

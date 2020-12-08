@@ -5,6 +5,7 @@ from copy import deepcopy
 from src.utils.utils import softmax
 import time
 
+
 class MCTS(object):
     """
     蒙特卡洛树的实现
@@ -17,12 +18,11 @@ class MCTS(object):
         self.root = Node(None, 1.)
 
     def get_actions(self, board, t=1e-3):
-        new_node = self._loc_node(board)
         for i in range(self.simulation_num):
             board_tmp = deepcopy(board)
-            self._search(board_tmp, new_node)
+            self._search(board_tmp)
 
-        action_visites = [(action, node.n) for action, node in new_node.childrens.items()]
+        action_visites = [(action, node.n) for action, node in self.root.childrens.items()]
         actions, visites = zip(*action_visites)
         if hasattr(self.model, 'pure_mcts'):
             # 概率就等于访问数量 不需要计算softmax 选择访问次数最大的
@@ -39,7 +39,7 @@ class MCTS(object):
                 node = node.childrens[action]
         return node
 
-    def _search(self, board, node):
+    def _search(self, board):
         """
         more detail see mcts/mcts.png
         :param board:
@@ -48,6 +48,7 @@ class MCTS(object):
         # index = len(board.actions)
         # start = time.time()
         # print('{} search start'.format(index))
+        node = self.root
         while True:
             if node.is_leaf:
                 break
@@ -57,14 +58,19 @@ class MCTS(object):
             board.move(action)
         # end = time.time()
         # print('{} search end cost: {}'.format(index, end - start))
-        probs, values = self.model.policy_value(board)
-        probs, values = np.squeeze(probs), np.squeeze(values, axis=0)
-        actions = board.availables
-        action_probs = probs[list(actions)]
+        # alphagozero 行棋主要是由mcts来指导完成
+        # 但是在MCTS搜索过程中，由于有一些不在树中的状态需要仿真 做局面评估，所以需要一个简单
+        # 策略来帮MCTS评估改进策略， 也就是神经网络model来完成
+        action_probs, values = self.model.policy_value(board)
         is_end, player = board.is_end
         if not is_end:
-            node.expansion(list(zip(actions, action_probs)))
-        value = self._rollout(board)
+            node.expansion(action_probs)
+            value = self._rollout(board)
+        else:
+            if player == -1:
+                value = 0.
+            else:
+                value = 1 if player == board.current_player else -1
         # if hasattr(self.model, 'pure_mcts'):
         #     if not is_end:
         #         node.expansion(list(zip(actions, action_probs)))
@@ -112,3 +118,17 @@ class MCTS(object):
             for action, _ in actions.items():
                 node = node.childrens[action]
         node.expansion(list(zip(availables, np.zeros(len(board.availables)))))
+
+    def reset(self):
+        self.root = Node(None, 1.)
+
+    def do_action(self, action):
+        """
+        每次行棋后让当前点作为根节点
+        :param action:
+        :return:
+        """
+        if action in self.root.childrens.keys():
+            self.root = self.root.childrens[action]
+        else:
+            self.root = Node(None, 1.)

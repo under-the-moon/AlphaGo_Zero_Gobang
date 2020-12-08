@@ -19,7 +19,7 @@ if __name__ == '__main__':
     weights_path = args.weights_path
     epoch = args.epoch
     x = import_module('models.' + model_name)
-    model = x.Model(weights_path)
+    model = x.Model()
     board = GoBang()
     game = Game(board, show=True)
     mcts = MCTS(model)
