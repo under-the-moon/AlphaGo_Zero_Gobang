@@ -20,11 +20,10 @@ class AlphaGoZero(object):
             if self.self_play:
                 action = np.random.choice(actions,
                                           p=0.75 * probs + 0.25 * np.random.dirichlet(0.3 * np.ones(len(probs))))
-                self.mcts.do_action(action)
             else:
                 # equal choose max visited n
                 action = np.random.choice(actions, p=probs)
-                self.mcts.reset()
+            self.mcts.do_action(action)
             return action, all_probs
         else:
             print('game is end because of board is full, no position to loc')

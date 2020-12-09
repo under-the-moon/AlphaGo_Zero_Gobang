@@ -23,11 +23,11 @@ class PipelineTrain(object):
     def train(self):
         print('train alphago zero')
         best_loss = np.inf
-        print('self play 100 games collect data start')
+        print('self play 10 games collect data start')
         start = time.time()
         self.add_selfplay_data(10)
         end = time.time()
-        print('self play 100 games collect data end cost: {}'.format(end - start))
+        print('self play 10 games collect data end cost: {}'.format(end - start))
         for i in range(self.epoch):
             print('start to sample train data')
             batch_data = random.sample(self.buffer_data,

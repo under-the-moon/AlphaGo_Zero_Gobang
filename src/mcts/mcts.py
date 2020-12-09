@@ -64,28 +64,22 @@ class MCTS(object):
         action_probs, values = self.model.policy_value(board)
         is_end, player = board.is_end
         if not is_end:
-            node.expansion(action_probs)
-            value = self._rollout(board)
+            if node.n == 0:
+                value = self._rollout(board)
+            else:
+                # for each available action from current, add a new state to the tree
+                node.expansion(action_probs)
+                # choose the fist new child node
+                keys = list(node.childrens.keys())
+                node = node.childrens[keys[0]]
+                # move to action
+                board.move(node.action)
+                value = self._rollout(board)
         else:
             if player == -1:
                 value = 0.
             else:
                 value = 1 if player == board.current_player else -1
-        # if hasattr(self.model, 'pure_mcts'):
-        #     if not is_end:
-        #         node.expansion(list(zip(actions, action_probs)))
-        #     value = self._rollout(board)
-        # else:
-        #     if not is_end:
-        #         node.expansion(list(zip(actions, action_probs)))
-        #         # 用神经网络的value来更新权重
-        #         value = values[0]
-        #     else:
-        #         if player == -1:
-        #             value = 0.
-        #         else:
-        #             value = 1 if player == board.current_player else -1
-        # update value
         node.update(value)
 
     def _rollout(self, board):
@@ -130,5 +124,6 @@ class MCTS(object):
         """
         if action in self.root.childrens.keys():
             self.root = self.root.childrens[action]
+            self.root.parent = None
         else:
             self.root = Node(None, 1.)

@@ -100,7 +100,7 @@ class Game(object):
 
     def save_record(self):
         with open(config.record_path, 'wb') as f:
-            pickle.dump(self.record, f, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(self.records, f, pickle.HIGHEST_PROTOCOL)
 
     def load_record(self):
         with open(config.record_path, 'rb') as f:

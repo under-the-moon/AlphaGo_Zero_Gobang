@@ -4,6 +4,7 @@ default_width = _border_widths[0]
 default_height = _border_heights[0]
 channel = 5
 players = {0: 'black', 1: 'white'}
+n_in_row = 5
 
 # train params
 # 正则化参数c  loss = (z-v)**2 + πlogp + c||w||**2
@@ -21,7 +22,7 @@ t = 1
 # using 1,600 simulations for each MCTS, which corresponds to approximately 0.4s thinking time per move.
 # use 8 * 8  divide 5
 ratio = (19 * 19) // (default_width * default_height)
-per_search_simulation_num = 1600 // ratio
+per_search_simulation_num = 400
 
 # save weigths path
 save_path = '../model/'

@@ -12,7 +12,7 @@ class Board(object):
         self.actions = {}
         self.actions_num = self.width * self.height
         self.availables = set(range(self.actions_num))
-        self.n_in_row = 5
+        self.n_in_row = config.n_in_row
         self.current_player = self.players[0]
 
     def reset(self):

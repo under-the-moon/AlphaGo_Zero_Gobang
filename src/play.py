@@ -44,7 +44,7 @@ def draw(data=None):
 
 board = GoBang()
 model = Model()
-model.load_weigths('model/best.h5')
+model.load_weigths('model/alphago_zero_2.h5')
 draw()
 while True:
     for event in pygame.event.get():
